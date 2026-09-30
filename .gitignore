@@ -1,0 +1,35 @@
+# Build C (tools/simulator)
+*.o
+*.obj
+*.exe
+*.out
+
+# Simulação RTL / UVM 
+*.vcd
+*.vpd
+*.fsdb
+*.fsdbdb
+*.wlf
+*.wdb
+csrc/
+simv*
+*.daidir
+INCA_libs/
+novas*
+verdiLog/
+*.log
+*.bak
+
+# Síntese / P&R 
+work/
+*.ddc
+*.svf
+alib-52
+*.spef
+*.sdf
+
+# Editor / sistema operacional
+*.swp
+*~
+.DS_Store
+Thumbs.db
