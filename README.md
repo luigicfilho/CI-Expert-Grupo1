@@ -15,7 +15,9 @@ Integrantes:
 
 # Projeto
 
-O objetivo do projeto é implementar um processador multi-ciclo, com a arquitetura definida abaixo.
+O objetivo do projeto é implementar um processador multi-ciclo, com a arquitetura definida abaixo como referência, não necessariamente a arquitetura final.
+
+![](docs/top-schematic.png)
 
 
 # Repositório
