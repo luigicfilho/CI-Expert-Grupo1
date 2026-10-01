@@ -8,7 +8,9 @@ Integrantes:
 | Luigi Ciambarella Filho     | Design for Test |
 | Danilo Machado de Oliveira  | Design for Test |
 | Andre Araujo                | Design Verification |
+| Lenisa Maria Costa de Souza | Design Verification |
 | Mateus Soares dos Santos    | Design Verification |
+| Daniel de Almeida Arantes   | Physical Design |
 | Gabriel Fazion dos Santos   | Physical Design |
 | Ludmila Moreira da Silveira | RTL Synthesis |
 | Emmanuel Priestley Titus    | RTL Synthesis |

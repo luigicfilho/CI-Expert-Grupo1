@@ -34,10 +34,19 @@ typedef struct {
     uint8_t  reg_b;
     uint8_t  reg_cmd;
     uint16_t reg_out;
+    uint16_t alu_result;
+    uint16_t mem_data_out;
 
     bool     flag_zero;
     bool     flag_error;
     bool     invalid_data;
+
+    bool     aluin_reg_en;
+    bool     datain_reg_en;
+    bool     aluout_reg_en;
+    bool     memory_read;
+    bool     memory_write;
+    bool     selmux2;
 
     bool     cpu_rdy;
 
@@ -45,7 +54,9 @@ typedef struct {
 } cpu_t;
 
 uint16_t alu_executar(uint8_t opcode, uint8_t a, uint8_t b, bool invalid_data, bool *zero, bool *error);
-void    decode_ciclo_fetch(cpu_t *cpu);
-uint8_t seleciona_mux(uint8_t sel, uint8_t d0, uint8_t d1, uint8_t d2, uint8_t feedback);
+void     decode_ciclo_fetch(cpu_t *cpu);
+void     executar(cpu_t *cpu);
+void     store(cpu_t *cpu);
+uint8_t  seleciona_mux(uint8_t sel, uint8_t d0, uint8_t d1, uint8_t d2, uint8_t feedback);
 
 #endif
