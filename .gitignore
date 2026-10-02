@@ -3,6 +3,8 @@
 *.obj
 *.exe
 *.out
+*.lst
+*.mem
 
 # Simulação RTL / UVM 
 *.vcd
