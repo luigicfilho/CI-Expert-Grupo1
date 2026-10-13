@@ -9,13 +9,14 @@ typedef struct
     char fonte[256];
 } InstrucaoPrograma;
 
-#define QUANTIDADE_INSTRUCOES_PROGRAMA 5
+#define QUANTIDADE_INSTRUCOES_PROGRAMA 6
 
 static const InstrucaoPrograma PROGRAMA[] =
 {
-    { 0x08, 10, 32, 0, "ADD  DIN1, DIN2" },
-    { 0x6A, 10, 32, 0, "MUL  DOUT_HIGH, DIN2" },
-    { 0x46, 10, 32, 3, "STORE DIN3" },
-    { 0x45, 10, 32, 3, "LOAD  DIN3" },
-    { 0x04, 10, 32, 3, "NOP" }
+    { 0x08, 10, 32, 0, "add  din1, din2" },
+    { 0x6A, 10, 32, 0, "mul  dout_high, din2" },
+    { 0x46, 10, 32, 3, "store din3" },
+    { 0x45, 10, 32, 3, "load  din3" },
+    { 0x04, 10, 32, 3, "nop" },
+    { 0x07, 10, 32, 3, "nop2" }
 };

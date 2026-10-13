@@ -39,6 +39,8 @@ typedef struct {
 
     bool     flag_zero;
     bool     flag_error;
+    bool     alu_zero_comb;
+    bool     alu_error_comb;
     bool     invalid_data;
 
     bool     aluin_reg_en;
@@ -57,6 +59,7 @@ uint16_t alu_executar(uint8_t opcode, uint8_t a, uint8_t b, bool invalid_data, b
 void     decode_ciclo_fetch(cpu_t *cpu);
 void     executar(cpu_t *cpu);
 void     store(cpu_t *cpu);
+void     cpu_step(cpu_t *cpu);
 uint8_t  seleciona_mux(uint8_t sel, uint8_t d0, uint8_t d1, uint8_t d2, uint8_t feedback);
 
 #endif
