@@ -16,7 +16,7 @@ stimulus_source_t* loader_factory_open(const char *filepath) {
     else if (strcmp(ext, ".test") == 0) {
         return test_loader_open(filepath);
     }
-    else if (strcmp(ext, ".mem") == 0) {
+    else if (strcmp(ext, ".hex") == 0 || strcmp(ext, ".mem") == 0) {
         return mem_loader_open(filepath);
     }
 

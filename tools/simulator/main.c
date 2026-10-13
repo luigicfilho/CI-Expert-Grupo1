@@ -8,7 +8,7 @@
 int main(int argc, char **argv) {
 
     if (argc < 2) {
-        fprintf(stderr, "Uso: %s <arquivo.stim | arquivo.test | arquivo.mem> [--verbose] [--dump <arquivo.csv>]\n", argv[0]);
+        fprintf(stderr, "Uso: %s <arquivo.stim | arquivo.test | arquivo.hex> [--verbose] [--dump <arquivo.csv>]\n", argv[0]);
         return 1;
     }
 

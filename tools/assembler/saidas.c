@@ -1,6 +1,6 @@
 #include "assembler.h"
 
-int gerar_mem(InstrucaoMontada programa[], int quantidade, const char nome_arquivo[])
+int gerar_hex(InstrucaoMontada programa[], int quantidade, const char nome_arquivo[])
 {
     FILE *arquivo_saida = fopen(nome_arquivo, "w");
     if (arquivo_saida == NULL)

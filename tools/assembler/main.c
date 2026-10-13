@@ -20,12 +20,13 @@ int main(int argc, char **argv)
 {
     if (argc < 2)
     {
-        fprintf(stderr, "uso: %s <programa.asm> [-o <nome_base>]\n", argv[0]);
+        fprintf(stderr, "uso: %s <programa.asm> [-o <arquivo_saida>] [--all]\n", argv[0]);
         return 1;
     }
 
     const char *caminho_entrada = NULL;
     const char *param_saida = NULL;
+    int modo_all = 0;
 
     for (int i = 1; i < argc; i = i + 1)
     {
@@ -33,6 +34,10 @@ int main(int argc, char **argv)
         {
             param_saida = argv[i + 1];
             i = i + 1;
+        }
+        else if (strcmp(argv[i], "--all") == 0)
+        {
+            modo_all = 1;
         }
         else if (argv[i][0] != '-')
         {
@@ -115,52 +120,93 @@ int main(int argc, char **argv)
                programa[i].texto_original);
     }
 
-    char nome_mem[256];
-    char nome_h[256];
-    char nome_lst[256];
-    char nome_stim[256];
-    char nome_test[256];
-
-    snprintf(nome_mem, sizeof(nome_mem), "%s.mem", base_saida);
-    snprintf(nome_h, sizeof(nome_h), "%s.h", base_saida);
-    snprintf(nome_lst, sizeof(nome_lst), "%s.lst", base_saida);
-    snprintf(nome_stim, sizeof(nome_stim), "%s.stim", base_saida);
-    snprintf(nome_test, sizeof(nome_test), "%s.test", base_saida);
-
-    int resultado_mem = gerar_mem(programa, resultado_montagem, nome_mem);
-    if (resultado_mem != 0)
+    if (param_saida != NULL)
     {
-        return 1;
-    }
-    printf("gerado: %s com %d instrucoes\n", nome_mem, resultado_montagem);
+        const char *ext = strrchr(param_saida, '.');
+        char arquivo_destino[256];
+        int res = 0;
 
-    int resultado_header = gerar_header(programa, resultado_montagem, nome_h);
-    if (resultado_header != 0)
-    {
-        return 1;
-    }
-    printf("gerado: %s com %d instrucoes\n", nome_h, resultado_montagem);
+        if (ext != NULL)
+        {
+            strncpy(arquivo_destino, param_saida, sizeof(arquivo_destino) - 1);
+            arquivo_destino[sizeof(arquivo_destino) - 1] = '\0';
 
-    int resultado_lst = gerar_lst(programa, resultado_montagem, nome_lst);
-    if (resultado_lst != 0)
-    {
-        return 1;
-    }
-    printf("gerado: %s com %d instrucoes\n", nome_lst, resultado_montagem);
+            if (strcmp(ext, ".hex") == 0 || strcmp(ext, ".mem") == 0)
+            {
+                res = gerar_hex(programa, resultado_montagem, arquivo_destino);
+            }
+            else if (strcmp(ext, ".test") == 0)
+            {
+                res = gerar_test(programa, resultado_montagem, arquivo_destino);
+            }
+            else if (strcmp(ext, ".stim") == 0)
+            {
+                res = gerar_stim(programa, resultado_montagem, arquivo_destino);
+            }
+            else if (strcmp(ext, ".lst") == 0)
+            {
+                res = gerar_lst(programa, resultado_montagem, arquivo_destino);
+            }
+            else if (strcmp(ext, ".h") == 0)
+            {
+                res = gerar_header(programa, resultado_montagem, arquivo_destino);
+            }
+            else
+            {
+                res = gerar_hex(programa, resultado_montagem, arquivo_destino);
+            }
+        }
+        else
+        {
+            snprintf(arquivo_destino, sizeof(arquivo_destino), "%s.hex", param_saida);
+            res = gerar_hex(programa, resultado_montagem, arquivo_destino);
+        }
 
-    int resultado_stim = gerar_stim(programa, resultado_montagem, nome_stim);
-    if (resultado_stim != 0)
-    {
-        return 1;
+        if (res != 0)
+        {
+            return 1;
+        }
+        printf("gerado: %s com %d instrucoes\n", arquivo_destino, resultado_montagem);
     }
-    printf("gerado: %s com %d instrucoes\n", nome_stim, resultado_montagem);
+    else if (modo_all)
+    {
+        char nome_hex[256];
+        char nome_h[256];
+        char nome_lst[256];
+        char nome_stim[256];
+        char nome_test[256];
 
-    int resultado_test = gerar_test(programa, resultado_montagem, nome_test);
-    if (resultado_test != 0)
-    {
-        return 1;
+        snprintf(nome_hex,  sizeof(nome_hex),  "%s.hex",  base_saida);
+        snprintf(nome_h,    sizeof(nome_h),    "%s.h",    base_saida);
+        snprintf(nome_lst,  sizeof(nome_lst),  "%s.lst",  base_saida);
+        snprintf(nome_stim, sizeof(nome_stim), "%s.stim", base_saida);
+        snprintf(nome_test, sizeof(nome_test), "%s.test", base_saida);
+
+        if (gerar_hex(programa, resultado_montagem, nome_hex) != 0) return 1;
+        printf("gerado: %s com %d instrucoes\n", nome_hex, resultado_montagem);
+
+        if (gerar_header(programa, resultado_montagem, nome_h) != 0) return 1;
+        printf("gerado: %s com %d instrucoes\n", nome_h, resultado_montagem);
+
+        if (gerar_lst(programa, resultado_montagem, nome_lst) != 0) return 1;
+        printf("gerado: %s com %d instrucoes\n", nome_lst, resultado_montagem);
+
+        if (gerar_stim(programa, resultado_montagem, nome_stim) != 0) return 1;
+        printf("gerado: %s com %d instrucoes\n", nome_stim, resultado_montagem);
+
+        if (gerar_test(programa, resultado_montagem, nome_test) != 0) return 1;
+        printf("gerado: %s com %d instrucoes\n", nome_test, resultado_montagem);
     }
-    printf("gerado: %s com %d instrucoes\n", nome_test, resultado_montagem);
+    else
+    {
+        char nome_hex[256];
+        snprintf(nome_hex, sizeof(nome_hex), "%s.hex", base_saida);
+        if (gerar_hex(programa, resultado_montagem, nome_hex) != 0)
+        {
+            return 1;
+        }
+        printf("gerado: %s com %d instrucoes\n", nome_hex, resultado_montagem);
+    }
 
     return 0;
 }
