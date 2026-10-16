@@ -31,6 +31,11 @@ typedef struct
     int  valor_din2;
     int  valor_din3;
     char texto_original[256];
+
+    int  tem_expect;
+    int  expect_dout;
+    int  expect_error;
+    int  expect_zero;
 } InstrucaoMontada;
 
 typedef struct
@@ -41,9 +46,12 @@ typedef struct
 } EstadoFios;
 
 void remover_excessos(char linha[]);
+void para_maiusculo(char str[]);
 int separar_tokens(char linha[], char tokens[][32], int maximo_tokens);
 TipoDeLinha classificar_linha(char tokens[][32]);
 int montar_programa(LinhaAssembly linhas[], int quantidade_linhas, InstrucaoMontada instrucoes[], int limite_instrucoes);
-int gerar_mem(InstrucaoMontada programa[], int quantidade, const char nome_arquivo[]);
+int gerar_hex(InstrucaoMontada programa[], int quantidade, const char nome_arquivo[]);
 int gerar_header(InstrucaoMontada programa[], int quantidade, const char nome_arquivo[]);
 int gerar_lst(InstrucaoMontada programa[], int quantidade, const char nome_arquivo[]);
+int gerar_stim(InstrucaoMontada programa[], int quantidade, const char nome_arquivo[]);
+int gerar_test(InstrucaoMontada programa[], int quantidade, const char nome_arquivo[]);

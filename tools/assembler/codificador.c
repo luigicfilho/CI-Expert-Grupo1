@@ -100,7 +100,7 @@ int montar_programa(LinhaAssembly linhas[], int quantidade_linhas, InstrucaoMont
 
         if (linha_atual.tipo == LINHA_SET)
         {
-            int novo_valor = atoi(linha_atual.tokens[3]);
+            int novo_valor = (int)strtol(linha_atual.tokens[3], NULL, 0);
 
             if (novo_valor < 0 || novo_valor > 255)
             {
@@ -138,6 +138,10 @@ int montar_programa(LinhaAssembly linhas[], int quantidade_linhas, InstrucaoMont
             nova.valor_din1 = fios.valor_din1;
             nova.valor_din2 = fios.valor_din2;
             nova.valor_din3 = fios.valor_din3;
+            nova.tem_expect = 0;
+            nova.expect_dout = 0;
+            nova.expect_error = 0;
+            nova.expect_zero = 0;
 
             int muxA = 0;
             int muxB = 0;
@@ -153,6 +157,46 @@ int montar_programa(LinhaAssembly linhas[], int quantidade_linhas, InstrucaoMont
 
             instrucoes[quantidade_montadas] = nova;
             quantidade_montadas = quantidade_montadas + 1;
+        }
+
+        if (linha_atual.tipo == LINHA_EXPECT)
+        {
+            if (quantidade_montadas == 0)
+            {
+                printf("erro linha %d: .expect deve vir apos uma instrucao\n", linha_atual.numero);
+                return -1;
+            }
+
+            if (linha_atual.quantidade_tokens < 4)
+            {
+                printf("erro linha %d: .expect exige 3 parametros: dout, error, zero\n", linha_atual.numero);
+                return -1;
+            }
+
+            int exp_dout = (int)strtol(linha_atual.tokens[1], NULL, 0);
+            int exp_err  = (int)strtol(linha_atual.tokens[2], NULL, 0);
+            int exp_zero = (int)strtol(linha_atual.tokens[3], NULL, 0);
+
+            instrucoes[quantidade_montadas - 1].tem_expect   = 1;
+            instrucoes[quantidade_montadas - 1].expect_dout  = exp_dout;
+            instrucoes[quantidade_montadas - 1].expect_error = exp_err;
+            instrucoes[quantidade_montadas - 1].expect_zero  = exp_zero;
+        }
+
+        if (linha_atual.tipo == LINHA_ECHO)
+        {
+            const char *msg = linha_atual.texto + 5;
+            while (*msg == ' ' || *msg == '\t' || *msg == '"') msg++;
+                char buffer[256];
+                strncpy(buffer, msg, sizeof(buffer) - 1);
+                buffer[sizeof(buffer) - 1] = '\0';
+                int len = (int)strlen(buffer);
+                while (len > 0 && (buffer[len - 1] == '"' || buffer[len - 1] == ' ' || buffer[len - 1] == '\t'))
+                {
+                    buffer[--len] = '\0';
+                }
+                printf("[ECHO] %s\n", buffer);
+            }
         }
     }
 

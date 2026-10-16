@@ -35,6 +35,17 @@ void remover_excessos(char linha[])
     linha[escrita] = '\0';
 }
 
+void para_maiusculo(char str[])
+{
+    for (int i = 0; str[i] != '\0'; i = i + 1)
+    {
+        if (str[i] >= 'a' && str[i] <= 'z')
+        {
+            str[i] = (char)(str[i] - ('a' - 'A'));
+        }
+    }
+}
+
 int separar_tokens(char linha[], char tokens[][32], int maximo_tokens)
 {
     int quantidade_tokens = 0;
@@ -71,6 +82,10 @@ int separar_tokens(char linha[], char tokens[][32], int maximo_tokens)
         }
 
         tokens[quantidade_tokens][posicao_token] = '\0';
+        if (tokens[quantidade_tokens][0] != '"')
+        {
+            para_maiusculo(tokens[quantidade_tokens]);
+        }
         quantidade_tokens = quantidade_tokens + 1;
 
         if (quantidade_tokens >= maximo_tokens)
@@ -94,12 +109,12 @@ TipoDeLinha classificar_linha(char tokens[][32])
         tipo = LINHA_SET;
     }
 
-    if (strcmp(mnemonico, ".expect") == 0)
+    if ((strcmp(mnemonico, ".EXPECT") == 0) || (strcmp(mnemonico, ".expect") == 0))
     {
         tipo = LINHA_EXPECT;
     }
 
-    if (strcmp(mnemonico, ".echo") == 0)
+    if ((strcmp(mnemonico, ".ECHO") == 0) || (strcmp(mnemonico, ".echo") == 0))
     {
         tipo = LINHA_ECHO;
     }
@@ -109,6 +124,7 @@ TipoDeLinha classificar_linha(char tokens[][32])
         (strcmp(mnemonico, "MUL") == 0) ||
         (strcmp(mnemonico, "DIV") == 0) ||
         (strcmp(mnemonico, "NOP") == 0) ||
+        (strcmp(mnemonico, "NOP2") == 0) ||
         (strcmp(mnemonico, "LOAD") == 0) ||
         (strcmp(mnemonico, "STORE") == 0))
     {

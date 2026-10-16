@@ -15,13 +15,13 @@ void decode_ciclo_fetch (cpu_t *cpu) {
         cpu->invalid_data = false;
 }
 
-void executar(cpu_t *cpu){
+void executar(cpu_t *cpu) {
     cpu->alu_result = alu_executar(cpu->reg_cmd & 0x07, 
-                                cpu->reg_a, 
-                                cpu->reg_b, 
-                                cpu->invalid_data,  
-                                &cpu->flag_zero, 
-                                &cpu->flag_error);
+                                   cpu->reg_a, 
+                                   cpu->reg_b, 
+                                   cpu->invalid_data,  
+                                   &cpu->alu_zero_comb, 
+                                   &cpu->alu_error_comb);
 }
 
 void store(cpu_t *cpu) {
@@ -71,13 +71,18 @@ void cpu_step(cpu_t *cpu) {
                 cpu->memory_write = true;
                 store(cpu);
             }
-            
-            if (cpu->selmux2) {
-                cpu->reg_out = cpu->mem_data_out;
-            } else {
-                cpu->reg_out = cpu->alu_result;
+
+            if (cpu->aluout_reg_en) {
+                cpu->flag_zero  = cpu->alu_zero_comb;
+                cpu->flag_error = cpu->alu_error_comb;
+
+                if (cpu->selmux2) {
+                    cpu->reg_out = cpu->mem_data_out;
+                } else {
+                    cpu->reg_out = cpu->alu_result;
+                }
             }
-            
+
             cpu->state = FETCH_DECODE;
             break;
         default:

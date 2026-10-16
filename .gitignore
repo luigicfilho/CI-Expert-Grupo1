@@ -5,6 +5,10 @@
 *.out
 *.lst
 *.mem
+*.stim
+*.test
+*.csv
+*.hex
 
 # Simulação RTL / UVM 
 *.vcd

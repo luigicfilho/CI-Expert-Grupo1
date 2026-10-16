@@ -1,17 +1,70 @@
 #include "assembler.h"
 
+static void extrair_nome_base(const char *caminho, char *base, size_t tamanho_max)
+{
+    strncpy(base, caminho, tamanho_max - 1);
+    base[tamanho_max - 1] = '\0';
+
+    char *ponto = strrchr(base, '.');
+    char *barra1 = strrchr(base, '/');
+    char *barra2 = strrchr(base, '\\');
+    char *ultima_barra = (barra1 > barra2) ? barra1 : barra2;
+
+    if (ponto != NULL && (ultima_barra == NULL || ponto > ultima_barra))
+    {
+        *ponto = '\0';
+    }
+}
+
 int main(int argc, char **argv)
 {
     if (argc < 2)
     {
-        fprintf(stderr, "uso: %s programa.asm\n", argv[0]);
+        fprintf(stderr, "uso: %s <programa.asm> [-o <arquivo_saida>] [--all]\n", argv[0]);
         return 1;
     }
 
-    FILE *arquivo_entrada = fopen(argv[1], "r");
+    const char *caminho_entrada = NULL;
+    const char *param_saida = NULL;
+    int modo_all = 0;
+
+    for (int i = 1; i < argc; i = i + 1)
+    {
+        if ((strcmp(argv[i], "-o") == 0) && (i + 1 < argc))
+        {
+            param_saida = argv[i + 1];
+            i = i + 1;
+        }
+        else if (strcmp(argv[i], "--all") == 0)
+        {
+            modo_all = 1;
+        }
+        else if (argv[i][0] != '-')
+        {
+            caminho_entrada = argv[i];
+        }
+    }
+
+    if (caminho_entrada == NULL)
+    {
+        fprintf(stderr, "erro: nenhum arquivo de entrada especificado\n");
+        return 1;
+    }
+
+    char base_saida[256];
+    if (param_saida != NULL)
+    {
+        extrair_nome_base(param_saida, base_saida, sizeof(base_saida));
+    }
+    else
+    {
+        extrair_nome_base(caminho_entrada, base_saida, sizeof(base_saida));
+    }
+
+    FILE *arquivo_entrada = fopen(caminho_entrada, "r");
     if (arquivo_entrada == NULL)
     {
-        fprintf(stderr, "erro: nao consegui abrir '%s'\n", argv[1]);
+        fprintf(stderr, "erro: nao consegui abrir '%s'\n", caminho_entrada);
         return 1;
     }
 
@@ -34,6 +87,7 @@ int main(int argc, char **argv)
         if (quantidade_linhas >= 1024)
         {
             fprintf(stderr, "erro: programa tem linhas demais\n");
+            fclose(arquivo_entrada);
             return 1;
         }
 
@@ -66,29 +120,93 @@ int main(int argc, char **argv)
                programa[i].texto_original);
     }
 
-    int resultado_mem = gerar_mem(programa, resultado_montagem, "program.mem");
-    if (resultado_mem != 0)
+    if (param_saida != NULL)
     {
-        return 1;
+        const char *ext = strrchr(param_saida, '.');
+        char arquivo_destino[256];
+        int res = 0;
+
+        if (ext != NULL)
+        {
+            strncpy(arquivo_destino, param_saida, sizeof(arquivo_destino) - 1);
+            arquivo_destino[sizeof(arquivo_destino) - 1] = '\0';
+
+            if (strcmp(ext, ".hex") == 0 || strcmp(ext, ".mem") == 0)
+            {
+                res = gerar_hex(programa, resultado_montagem, arquivo_destino);
+            }
+            else if (strcmp(ext, ".test") == 0)
+            {
+                res = gerar_test(programa, resultado_montagem, arquivo_destino);
+            }
+            else if (strcmp(ext, ".stim") == 0)
+            {
+                res = gerar_stim(programa, resultado_montagem, arquivo_destino);
+            }
+            else if (strcmp(ext, ".lst") == 0)
+            {
+                res = gerar_lst(programa, resultado_montagem, arquivo_destino);
+            }
+            else if (strcmp(ext, ".h") == 0)
+            {
+                res = gerar_header(programa, resultado_montagem, arquivo_destino);
+            }
+            else
+            {
+                res = gerar_hex(programa, resultado_montagem, arquivo_destino);
+            }
+        }
+        else
+        {
+            snprintf(arquivo_destino, sizeof(arquivo_destino), "%s.hex", param_saida);
+            res = gerar_hex(programa, resultado_montagem, arquivo_destino);
+        }
+
+        if (res != 0)
+        {
+            return 1;
+        }
+        printf("gerado: %s com %d instrucoes\n", arquivo_destino, resultado_montagem);
     }
-
-    printf("gerado: program.mem com %d instrucoes\n", resultado_montagem);
-
-    int resultado_header = gerar_header(programa, resultado_montagem, "program.h");
-    if (resultado_header != 0)
+    else if (modo_all)
     {
-        return 1;
+        char nome_hex[256];
+        char nome_h[256];
+        char nome_lst[256];
+        char nome_stim[256];
+        char nome_test[256];
+
+        snprintf(nome_hex,  sizeof(nome_hex),  "%s.hex",  base_saida);
+        snprintf(nome_h,    sizeof(nome_h),    "%s.h",    base_saida);
+        snprintf(nome_lst,  sizeof(nome_lst),  "%s.lst",  base_saida);
+        snprintf(nome_stim, sizeof(nome_stim), "%s.stim", base_saida);
+        snprintf(nome_test, sizeof(nome_test), "%s.test", base_saida);
+
+        if (gerar_hex(programa, resultado_montagem, nome_hex) != 0) return 1;
+        printf("gerado: %s com %d instrucoes\n", nome_hex, resultado_montagem);
+
+        if (gerar_header(programa, resultado_montagem, nome_h) != 0) return 1;
+        printf("gerado: %s com %d instrucoes\n", nome_h, resultado_montagem);
+
+        if (gerar_lst(programa, resultado_montagem, nome_lst) != 0) return 1;
+        printf("gerado: %s com %d instrucoes\n", nome_lst, resultado_montagem);
+
+        if (gerar_stim(programa, resultado_montagem, nome_stim) != 0) return 1;
+        printf("gerado: %s com %d instrucoes\n", nome_stim, resultado_montagem);
+
+        if (gerar_test(programa, resultado_montagem, nome_test) != 0) return 1;
+        printf("gerado: %s com %d instrucoes\n", nome_test, resultado_montagem);
     }
-
-    printf("gerado: program.h com %d instrucoes\n", resultado_montagem);
-
-    int resultado_lst = gerar_lst(programa, resultado_montagem, "program.lst");
-    if (resultado_lst != 0)
+    else
     {
-        return 1;
+        char nome_hex[256];
+        snprintf(nome_hex, sizeof(nome_hex), "%s.hex", base_saida);
+        if (gerar_hex(programa, resultado_montagem, nome_hex) != 0)
+        {
+            return 1;
+        }
+        printf("gerado: %s com %d instrucoes\n", nome_hex, resultado_montagem);
     }
-
-    printf("gerado: program.lst com %d instrucoes\n", resultado_montagem);
 
     return 0;
 }

@@ -14,13 +14,13 @@ uint16_t alu_executar(uint8_t opcode, uint8_t a, uint8_t b, bool invalid_data, b
 
     switch (opcode) {
         case OP_ADD:
-            resultado = a + b;
+            resultado = (uint16_t)((uint32_t)a + (uint32_t)b);
             break;
         case OP_SUB:
-            resultado = a - b;
+            resultado = (uint16_t)((uint32_t)a - (uint32_t)b);
             break;
         case OP_MUL:
-            resultado = a * b;
+            resultado = (uint16_t)((uint32_t)a * (uint32_t)b);
             break;
         case OP_DIV:
             if (b == 0){
@@ -28,14 +28,14 @@ uint16_t alu_executar(uint8_t opcode, uint8_t a, uint8_t b, bool invalid_data, b
                 resultado = 0xFFFF;
                 break;
             }
-            resultado = a / b;
+            resultado = (uint16_t)(a / b);
             break;
         default:
             resultado = 0;
             break;
     }
 
-    *zero  = (resultado == 0);
+    *zero = (resultado == 0);
 
     return resultado;
 }
