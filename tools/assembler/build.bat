@@ -7,6 +7,6 @@ cl /nologo /W4 /D_CRT_SECURE_NO_WARNINGS /Fe:asm.exe main.c parser.c codificador
 if errorlevel 1 goto :fim
 
 asm.exe exemplo.asm
-asm.exe exemplo.asm -o program
+asm.exe exemplo.asm -o program.stim
 
 :fim
