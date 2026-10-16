@@ -11,7 +11,11 @@ int gerar_hex(InstrucaoMontada programa[], int quantidade, const char nome_arqui
 
     for (int i = 0; i < quantidade; i = i + 1)
     {
-        fprintf(arquivo_saida, "%02X\n", programa[i].cmd);
+        fprintf(arquivo_saida, "%02X%02X%02X%02X\n",
+                programa[i].valor_din1,
+                programa[i].valor_din2,
+                programa[i].valor_din3,
+                programa[i].cmd);
     }
 
     fclose(arquivo_saida);

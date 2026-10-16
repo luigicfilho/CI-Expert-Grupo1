@@ -4,9 +4,10 @@
 #include "tracer.h"
 #include <stdio.h>
 
-void run_simulation(cpu_t *cpu, stimulus_source_t *source, bool verbose, tracer_t *tracer) {
+int run_simulation(cpu_t *cpu, stimulus_source_t *source, bool verbose, tracer_t *tracer) {
     stimulus_t stim;
     int instr_idx = 0;
+    int fail_count = 0;
     uint32_t total_cycles = 0;
     printf(" Iniciando Simulacao...\n");
     
@@ -39,6 +40,7 @@ void run_simulation(cpu_t *cpu, stimulus_source_t *source, bool verbose, tracer_
             if (match) {
                 printf("  -> [PASS] Instr %d OK\n", instr_idx);
             } else {
+                fail_count++;
                 printf("  -> [FAIL] Instr %d: esperado (out=0x%04X, err=%d, zero=%d), "
                     "obtido (out=0x%04X, err=%d, zero=%d)\n",
                     instr_idx,
@@ -56,4 +58,6 @@ void run_simulation(cpu_t *cpu, stimulus_source_t *source, bool verbose, tracer_
         printf("  Mem[%d] = 0x%04X (%5u)\n", i, cpu->memory[i], cpu->memory[i]);
     }
     printf("---\n");
+
+    return fail_count;
 }

@@ -51,12 +51,12 @@ int main(int argc, char **argv) {
     cpu_t cpu = {0};
 
     cpu_step(&cpu);
-    run_simulation(&cpu, source, verbose, tracer);
+    int failures = run_simulation(&cpu, source, verbose, tracer);
 
     if (tracer) {
         tracer->close(tracer);
     }
     source->close(source);
 
-    return 0;
+    return (failures > 0) ? 1 : 0;
 }

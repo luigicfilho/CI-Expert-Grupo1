@@ -12,7 +12,6 @@ static bool mem_next(stimulus_source_t *self, stimulus_t *out_stim) {
     char linha[256];
 
     while (fgets(linha, sizeof(linha), ctx->file)) {
-
         if (linha[0] == '\n' || linha[0] == '\r' || linha[0] == ';' || linha[0] == '#' || (linha[0] == '/' && linha[1] == '/')) {
             continue;
         }
@@ -21,16 +20,14 @@ static bool mem_next(stimulus_source_t *self, stimulus_t *out_stim) {
             continue;
         }
 
-        unsigned int cmd;
-
-        if (sscanf(linha, "%x", &cmd) == 1) {
-            out_stim->din1 = 0;
-            out_stim->din2 = 0;
-            out_stim->din3 = 0;
-            out_stim->cmd  = (uint8_t)cmd;
+        uint32_t vec;
+        if (sscanf(linha, "%x", &vec) == 1) {
+            out_stim->din1 = (uint8_t)(vec >> 24);
+            out_stim->din2 = (uint8_t)(vec >> 16);
+            out_stim->din3 = (uint8_t)(vec >> 8);
+            out_stim->cmd  = (uint8_t)vec;
             out_stim->has_expected = false;
             ctx->line_count++;
-
             return true;
         }
     }
