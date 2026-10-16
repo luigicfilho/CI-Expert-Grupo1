@@ -185,15 +185,8 @@ int montar_programa(LinhaAssembly linhas[], int quantidade_linhas, InstrucaoMont
 
         if (linha_atual.tipo == LINHA_ECHO)
         {
-            const char *msg = strstr(linha_atual.texto, ".echo");
-            if (msg == NULL)
-            {
-                msg = strstr(linha_atual.texto, ".ECHO");
-            }
-            if (msg != NULL)
-            {
-                msg = msg + 5;
-                while (*msg == ' ' || *msg == '\t' || *msg == '"') msg++;
+            const char *msg = linha_atual.texto + 5;
+            while (*msg == ' ' || *msg == '\t' || *msg == '"') msg++;
                 char buffer[256];
                 strncpy(buffer, msg, sizeof(buffer) - 1);
                 buffer[sizeof(buffer) - 1] = '\0';
