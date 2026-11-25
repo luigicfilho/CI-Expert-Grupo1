@@ -32,6 +32,8 @@ localparam [1:0] STORE  = 2'b11;
 
 localparam [2:0] OP_LOAD  = 3'b101;
 localparam [2:0] OP_STORE = 3'b110;
+localparam [2:0] OP_NOP0  = 3'b100;
+localparam [2:0] OP_NOP1  = 3'b111;
 
 reg [1:0] state, next_state;
 
@@ -40,6 +42,11 @@ wire [2:0] opcode = reg_cmd[2:0];
 // Operando usa realimentação (dout_high / dout_low) se seletor == 2'b11
 wire fb_fetch = (cmd_in[6:5]  == 2'b11) | (cmd_in[4:3]  == 2'b11);
 wire fb_hold  = (reg_cmd[6:5] == 2'b11) | (reg_cmd[4:3] == 2'b11);
+wire is_nop = (opcode == OP_NOP0) || (opcode == OP_NOP1);
+// STORE consome o resultado anterior como dado. LOAD usa somente A.
+wire use_invalid_result = (opcode == OP_STORE) ||
+    ((opcode == OP_LOAD) ? (reg_cmd[6:5] == 2'b11) : fb_hold);
+wire execute_invalid = p_error && !is_nop && use_invalid_result;
 
 // ---------------------------------------------------------------------------
 // Bloco 1: registrador de estado (reset assíncrono)
@@ -86,8 +93,8 @@ always @(*) begin
         EXEC: begin
             next_state   = STORE;
             alu_op       = opcode;
-            invalid_data = fb_hold & p_error;
-            if (opcode == OP_LOAD) begin
+            invalid_data = execute_invalid;
+            if ((opcode == OP_LOAD) && !execute_invalid) begin
                 memory_read = 1'b1;
                 selmux2     = 1'b1;
             end
@@ -96,13 +103,13 @@ always @(*) begin
         STORE: begin
             next_state    = FETCH;
             alu_op        = opcode;
-            invalid_data  = fb_hold & p_error;
-            aluout_reg_en = 1'b1;
-            if (opcode == OP_LOAD) begin
+            invalid_data  = execute_invalid;
+            aluout_reg_en = !is_nop && ((opcode != OP_STORE) || execute_invalid);
+            if ((opcode == OP_LOAD) && !execute_invalid) begin
                 memory_read = 1'b1;   // mantém leitura até capturar em reg_out
                 selmux2     = 1'b1;
             end
-            if (opcode == OP_STORE)
+            if ((opcode == OP_STORE) && !execute_invalid)
                 memory_write = 1'b1;
         end
 

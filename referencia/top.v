@@ -24,7 +24,7 @@ wire                 alu_error;       // flag error combinacional da ALU
 wire [2*WIDTH-1:0]   mem_data_out;    // memory.data_out
 wire [2*WIDTH-1:0]   aluout_sel;      // saída do mux selmux2 -> reg_out.d
 wire [2*WIDTH-1:0]   reg_out_q;       // reg_out.q = {dout_high, dout_low}
-wire [6:0]           reg_cmd_q;       // reg_cmd.q -> control.cmd_in
+wire [6:0]           reg_cmd_q;       // comando registrado -> control.reg_cmd
 wire [1:0]           flags_q;         // reg_flags.q = {error, zero}
 
 // Controle
@@ -84,13 +84,14 @@ alu #(
 );
 
 localparam ADDR_W = 3;
+wire [ADDR_W-1:0] mem_address = op_a; // trunca ou estende com zeros
 
 memory #(
     .WIDTH (WIDTH)
 ) u_mem (
     .clk     (clk),
     .rst_n   (rst_n),
-    .address (op_a[ADDR_W-1:0]),
+    .address (mem_address),
     .data_in (reg_out_q),
     .write   (memory_write),
     .read    (memory_read),
@@ -127,7 +128,7 @@ register_bank #(
     .clk (clk),
     .rst_n(rst_n),
     .en  (aluout_reg_en),
-    .d   ({alu_error, alu_zero}),
+    .d   ({alu_error, selmux2 ? (mem_data_out == {2*WIDTH{1'b0}}) : alu_zero}),
     .q   (flags_q)
 );
 
